@@ -34,7 +34,8 @@ def time_function(exec_time):
 # function to execute activity and help in concurrency
 def execute_activity(task, str_template, txt_lines, lock=0):
     
-    temp = str_template.copy()
+    temp = str_template
+    print("Current Task: ", temp)
     line = log_line(temp) + " Entry\n"
     print(line)
     txt_lines.append(line)
@@ -45,11 +46,10 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         lock.acquire()
     if "Execution" in task_attr:
         sub_flow = task['Activities']
+        lock_new = 0
         if task['Execution'] == "Concurrent":
-            lock = td.Lock()
-        else:
-            lock = 0
-        act_on_activities(sub_flow, temp, txt_lines, lock)
+            lock_new = td.Lock()
+        act_on_activities(sub_flow, temp, txt_lines, lock_new)
     else:
         if task['Function'] == 'TimeFunction' and condition:    
             op_str = log_line(temp)
@@ -73,6 +73,7 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     line = log_line(temp) + " Exit\n"
     print(line)
     txt_lines.append(line)
+    temp.pop(-1)
         
 #here the activities are parsed
 def act_on_activities(activity, str_template, txt_lines, lock = 0):
@@ -83,15 +84,13 @@ def act_on_activities(activity, str_template, txt_lines, lock = 0):
     temp_act = str_template.copy()
     for x in list_tasks:
         task = activity[x]
-        temp_act.append(x)
-        print("Current Task: ", temp_act)
+        temp_x = temp_act + [x]
         if lock != 0:
-            t1 = td.Thread(target=execute_activity, args=(task, temp_act, txt_lines, lock))
+            t1 = td.Thread(target=execute_activity,\
+                           args=(task, temp_x, txt_lines, lock))
             threads.append(t1)
-            temp_act.pop(-1)
         else:
-            execute_activity(task, temp_act, txt_lines)
-            temp_act.pop(-1)
+            execute_activity(task, temp_x, txt_lines)
     if lock != 0:
         for x  in threads:
             x.start()
@@ -106,6 +105,7 @@ if __name__ == "__main__":
         log_file = open("Sample-OP-Files\Milestone1B.txt", "w+")
         workflow_keys = list(ip_data.keys())
         Lock = td.Lock()
+        #act on each workflow 
         for x in workflow_keys:
             txt_line = []
             str_template = [x]
