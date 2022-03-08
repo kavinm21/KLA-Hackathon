@@ -38,8 +38,6 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     task_attr = list(task.keys())
     # change to required conditional expression
     condition = 1
-    if lock != 0:
-        lock.acquire()
     if "Execution" in task_attr:
         sub_flow = task['Activities']
         lock_new = 0
@@ -49,7 +47,12 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         line = log_line(temp) + " Entry\n"
         print(line)
         txt_lines.append(line)
+        if lock != 0:
+            lock.acquire()
         act_on_activities(sub_flow, temp, txt_lines, lock_new)
+        line = log_line(temp) + " Exit\n"
+        print(line)
+        txt_lines.append(line)
     else:
         if task['Function'] == 'TimeFunction' and condition:    
             print("Current Task: ", temp)
@@ -63,6 +66,8 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             op_str += task_input['FunctionInput'] + ","
             op_str += str(exec_time) + ")\n"
             txt_lines.append(op_str)
+            if lock != 0:
+                lock.acquire()
             time_function(exec_time)
             line = log_line(temp) + " Exit\n"
             print(line)
