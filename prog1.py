@@ -35,10 +35,6 @@ def time_function(exec_time):
 def execute_activity(task, str_template, txt_lines, lock=0):
     
     temp = str_template
-    print("Current Task: ", temp)
-    line = log_line(temp) + " Entry\n"
-    print(line)
-    txt_lines.append(line)
     task_attr = list(task.keys())
     # change to required conditional expression
     condition = 1
@@ -49,9 +45,17 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         lock_new = 0
         if task['Execution'] == "Concurrent":
             lock_new = td.Lock()
+        print("Current Task: ", temp)
+        line = log_line(temp) + " Entry\n"
+        print(line)
+        txt_lines.append(line)
         act_on_activities(sub_flow, temp, txt_lines, lock_new)
     else:
         if task['Function'] == 'TimeFunction' and condition:    
+            print("Current Task: ", temp)
+            line = log_line(temp) + " Entry\n"
+            print(line)
+            txt_lines.append(line)
             op_str = log_line(temp)
             task_input = task['Inputs']
             exec_time = int(task_input['ExecutionTime'])
@@ -60,6 +64,9 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             op_str += str(exec_time) + ")\n"
             txt_lines.append(op_str)
             time_function(exec_time)
+            line = log_line(temp) + " Exit\n"
+            print(line)
+            txt_lines.append(line)
         elif task['Function'] == 'DataLoad' and condition:
             op_str = log_line(temp)
             task_input = task['Inputs']
@@ -70,9 +77,6 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             file_dict[temp[-1]] = file_data
     if lock != 0:
         lock.release()
-    line = log_line(temp) + " Exit\n"
-    print(line)
-    txt_lines.append(line)
     temp.pop(-1)
         
 #here the activities are parsed
