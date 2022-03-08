@@ -23,7 +23,7 @@ def log_line(str_template):
 #function for data_load
 def data_load(fname):
     df = pd.read_csv(fname)
-    
+    return [df, len(df.index)]
 #function for time_function
 def time_function(exec_time):
     time.sleep(exec_time)
@@ -44,8 +44,7 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         sub_flow = task['Activities']
         act_on_activities(sub_flow, temp, txt_lines, lock)
     else:
-        if task['Function'] == 'TimeFunction' and condition:
-            
+        if task['Function'] == 'TimeFunction' and condition:    
             op_str = log_line(temp)
             task_input = task['Inputs']
             exec_time = int(task_input['ExecutionTime'])
@@ -54,6 +53,14 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             op_str += str(exec_time) + ")\n"
             txt_lines.append(op_str)
             time_function(exec_time)
+        elif task['Function'] == 'DataLoad' and condition:
+            op_str = log_line(temp)
+            task_input = task['Inputs']
+            fname = task_input['Filename']
+            op_str += "Executing DataLoad(" + fname + ')\n'
+            txt_lines.append(op_str)
+            file_data = data_load(txt_lines)
+            
     if lock != 0:
         lock.release()
     line = log_line(temp) + " Exit\n"
@@ -104,6 +111,5 @@ if __name__ == "__main__":
         print("File Created!")
         log_file.close()
     print("log file closed")
-    
-            
+                
             
