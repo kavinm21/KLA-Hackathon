@@ -37,13 +37,16 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     temp = str_template
     task_attr = list(task.keys())
     # change to required conditional expression
-    data = 0
+    condition = True
     if "Condition" in task_attr:
         condition = task['Conditional']
         ind = condition.split('(')[1].split(')')[0].split('.')
         expr = str(file_dict[ind][1]) + " "
         expr += condition.split(')')[1][0] + " "
-        expr += 
+        for i in range(len(condition) - 1, 0, -1):
+            if not condition[i].isdigit():
+                break
+        expr += condition[i:]
         condition = eval(expr)
     if "Execution" in task_attr:
         sub_flow = task['Activities']
@@ -56,6 +59,11 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         txt_lines.append(line)
         #if lock != 0:
          #   lock.acquire()
+        if not condition:
+            line = log_line(temp) + " Skipped\n"
+            print(line)
+            txt_lines.append(line)
+            return
         act_on_activities(sub_flow, temp, txt_lines, lock_new)
         line = log_line(temp) + " Exit\n"
         print(line)
@@ -67,6 +75,11 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             print(line)
             txt_lines.append(line)
             task_input = task['Inputs']
+            if not condition:
+                line = log_line(temp) + " Skipped\n"
+                print(line)
+                txt_lines.append(line)
+                return
             #if lock != 0:
              #   lock.acquire()
             if len(task_input['ExecutionTime']) > 5:
@@ -89,6 +102,11 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             line = log_line(temp) + " Entry\n"
             print(line)
             txt_lines.append(line)
+            if not condition:
+                line = log_line(temp) + " Skipped\n"
+                print(line)
+                txt_lines.append(line)
+                return
             task_input = task['Inputs']
             op_str = log_line(temp)
             task_input = task['Inputs']
@@ -128,10 +146,10 @@ def act_on_activities(activity, str_template, txt_lines, lock = 0):
             
 if __name__ == "__main__":
     
-    with open("Files\Milestone1\Milestone1B.yaml") \
+    with open("Files\Milestone2\Milestone2A.yaml") \
     as ip_file:
         ip_data = yaml.load(ip_file, Loader=yaml.FullLoader)
-        log_file = open("Sample-OP-Files\Milestone1B.txt", "w+")
+        log_file = open("Sample-OP-Files\Milestone2A.txt", "w+")
         workflow_keys = list(ip_data.keys())
         Lock = td.Lock()
         #act on each workflow 
