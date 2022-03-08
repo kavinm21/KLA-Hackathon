@@ -39,8 +39,9 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     # change to required conditional expression
     condition = True
     if "Condition" in task_attr:
-        condition = task['Conditional']
+        condition = task['Condition']
         ind = condition.split('(')[1].split(')')[0].split('.')
+        ind = str(ind)
         expr = str(file_dict[ind][1]) + " "
         expr += condition.split(')')[1][0] + " "
         for i in range(len(condition) - 1, 0, -1):
@@ -110,11 +111,11 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             task_input = task['Inputs']
             op_str = log_line(temp)
             task_input = task['Inputs']
-            fname = task_input['Filename']
+            fname = "Files" + "\\" + "Milestone2" + '\\' +task_input['Filename']
             op_str += "Executing DataLoad(" + fname + ')\n'
             txt_lines.append(op_str)
-            file_data = data_load(txt_lines)
-            file_dict[temp] = file_data
+            file_data = data_load(fname)
+            file_dict[str(temp)] = file_data
             line = log_line(temp) + " Exit\n"
             print(line)
             txt_lines.append(line)
