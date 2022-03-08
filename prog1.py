@@ -21,15 +21,21 @@ def log_line(str_template):
     return string
 
 #function for time_function
-def time_function(exec_time):
+def time_function(exec_time, lock = 0):
     #pause execution
-    time.sleep(exec_time)
+    if lock == 0:
+        time.sleep(exec_time)
+    else:
+        lock.acquire()
+        time.sleep(exec_time)
+        lock.release()
 
 #here the activities are parsed
-def act_on_activities(activity, str_template, txt_lines):
+def act_on_activities(activity, str_template, txt_lines, lock = 0):
     
     #parsing the activities to execute them
     list_tasks = list(activity.keys())
+    threads = []
     for x in list_tasks:
         task = activity[x]
         str_template.append(x)
@@ -50,6 +56,9 @@ def act_on_activities(activity, str_template, txt_lines):
                 op_str += task_input['FunctionInput'] + ","
                 op_str += str(exec_time) + ")\n"
                 txt_lines.append(op_str)
+                #if lock != 0:
+                 #   threads.append(td.Thread(target=time_function, args(exec_time,lock)))
+                #else:
                 time_function(exec_time)
         line = log_line(str_template) + " Exit\n"
         txt_lines.append(line)
@@ -57,21 +66,22 @@ def act_on_activities(activity, str_template, txt_lines):
     
 if __name__ == "__main__":
     
-    with open("Files\Examples\Milestone1\Milestone1_Example.yaml") \
+    with open("Files\Milestone1\Milestone1A.yaml") \
     as ip_file:
             ip_data = yaml.load(ip_file, Loader=yaml.FullLoader)
-            log_file = open("Sample-OP-Files\Milestone1_Example.txt", "a+")
+            log_file = open("Sample-OP-Files\Milestone1A.txt", "a+")
             workflow_keys = list(ip_data.keys())
+            Lock = td.Lock()
             for x in workflow_keys:
                 txt_lines = []
                 str_template = [x]
                 task_string = log_line(str_template) + " Entry\n"
                 txt_lines.append(task_string)
-                workflow = ip_data['M1SampleWorkFlow']
-                #type_exec = workflow['Type']
-                #exec_ord = workflow['Execution']
+                workflow = ip_data[x]
+                exec_ord = workflow['Execution']
                 activity = workflow['Activities']
-                act_on_activities(activity, str_template, txt_lines)
+                lock = 0
+                act_on_activities(activity, str_template, txt_lines, lock)
                 task_string = log_line(str_template) + " Exit\n"
                 txt_lines.append(task_string)
                 log_file.writelines(txt_lines)
