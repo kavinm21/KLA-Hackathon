@@ -41,7 +41,9 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     if "Condition" in task_attr:
         condition = task['Conditional']
         ind = condition.split('(')[1].split(')')[0].split('.')
-        data = file_dict[ind]
+        data = file_dict[ind][1]
+        op = condition.split(')')[1][0]
+        
     if "Execution" in task_attr:
         sub_flow = task['Activities']
         lock_new = 0
@@ -67,7 +69,9 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             #if lock != 0:
              #   lock.acquire()
             if len(task_input['ExecutionTime']) > 5:
-                exec_time = data
+                condition = task['Conditional']
+                ind = condition.split('(')[1].split(')')[0].split('.')
+                exec_time = file_dict[ind][1]
             else:
                 exec_time = int(task_input['ExecutionTime'])
             op_str = log_line(temp)
