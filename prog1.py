@@ -36,6 +36,7 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     
     temp = str_template.copy()
     line = log_line(temp) + " Entry\n"
+    print(line)
     txt_lines.append(line)
     task_attr = list(task.keys())
     # change to required conditional expression
@@ -46,6 +47,8 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         sub_flow = task['Activities']
         if task['Execution'] == "Concurrent":
             lock = td.Lock()
+        else:
+            lock = 0
         act_on_activities(sub_flow, temp, txt_lines, lock)
     else:
         if task['Function'] == 'TimeFunction' and condition:    
@@ -68,8 +71,8 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     if lock != 0:
         lock.release()
     line = log_line(temp) + " Exit\n"
+    print(line)
     txt_lines.append(line)
-    temp.pop(-1)
         
 #here the activities are parsed
 def act_on_activities(activity, str_template, txt_lines, lock = 0):
@@ -77,18 +80,18 @@ def act_on_activities(activity, str_template, txt_lines, lock = 0):
     #parsing the activities to execute them
     list_tasks = list(activity.keys())
     threads = []
-    temp = str_template.copy()
+    temp_act = str_template.copy()
     for x in list_tasks:
         task = activity[x]
-        temp.append(x)
-        print("Current Task: ", temp)
+        temp_act.append(x)
+        print("Current Task: ", temp_act)
         if lock != 0:
-            t1 = td.Thread(target=execute_activity, args=(task, temp, txt_lines, lock))
+            t1 = td.Thread(target=execute_activity, args=(task, temp_act, txt_lines, lock))
             threads.append(t1)
-            temp.pop(-1)
+            temp_act.pop(-1)
         else:
-            execute_activity(task, temp, txt_lines)
-            temp.pop(-1)
+            execute_activity(task, temp_act, txt_lines)
+            temp_act.pop(-1)
     if lock != 0:
         for x  in threads:
             x.start()
@@ -112,7 +115,7 @@ if __name__ == "__main__":
             exec_ord = workflow['Execution']
             activity = workflow['Activities']
             if exec_ord == "Sequential":
-                lock = 0
+                Lock = 0
             act_on_activities(activity, str_template, txt_line, Lock)
             task_string = log_line(str_template) + " Exit\n"
             txt_line.append(task_string)
