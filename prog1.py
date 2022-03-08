@@ -20,6 +20,10 @@ def log_line(str_template):
             string += '.'
     return string
 
+#function for data_load
+def data_load(fname):
+    df = pd.read_csv(fname)
+    
 #function for time_function
 def time_function(exec_time, lock = 0):
     #pause execution
@@ -56,9 +60,9 @@ def act_on_activities(activity, str_template, txt_lines, lock = 0):
                 op_str += task_input['FunctionInput'] + ","
                 op_str += str(exec_time) + ")\n"
                 txt_lines.append(op_str)
-                #if lock != 0:
-                 #   threads.append(td.Thread(target=time_function, args(exec_time,lock)))
-                #else:
+                if lock != 0:
+                    threads.append(td.Thread(target=time_function, args(exec_time,lock)))
+                else:
                 time_function(exec_time)
         line = log_line(str_template) + " Exit\n"
         txt_lines.append(line)
@@ -66,10 +70,10 @@ def act_on_activities(activity, str_template, txt_lines, lock = 0):
     
 if __name__ == "__main__":
     
-    with open("Files\Milestone1\Milestone1A.yaml") \
+    with open("Files\Milestone1\Milestone1B.yaml") \
     as ip_file:
             ip_data = yaml.load(ip_file, Loader=yaml.FullLoader)
-            log_file = open("Sample-OP-Files\Milestone1A.txt", "a+")
+            log_file = open("Sample-OP-Files\Milestone1B.txt", "a+")
             workflow_keys = list(ip_data.keys())
             Lock = td.Lock()
             for x in workflow_keys:
