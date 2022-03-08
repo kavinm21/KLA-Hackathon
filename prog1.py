@@ -41,9 +41,10 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     if "Condition" in task_attr:
         condition = task['Conditional']
         ind = condition.split('(')[1].split(')')[0].split('.')
-        data = file_dict[ind][1]
-        op = condition.split(')')[1][0]
-        
+        expr = str(file_dict[ind][1]) + " "
+        expr += condition.split(')')[1][0] + " "
+        expr += 
+        condition = eval(expr)
     if "Execution" in task_attr:
         sub_flow = task['Activities']
         lock_new = 0
