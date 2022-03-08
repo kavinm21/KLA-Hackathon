@@ -37,7 +37,11 @@ def execute_activity(task, str_template, txt_lines, lock=0):
     temp = str_template
     task_attr = list(task.keys())
     # change to required conditional expression
-    condition = 1
+    data = 0
+    if "Condition" in task_attr:
+        condition = task['Conditional']
+        ind = condition.split('(')[1].split(')')[0].split('.')
+        data = file_dict[ind]
     if "Execution" in task_attr:
         sub_flow = task['Activities']
         lock_new = 0
@@ -47,8 +51,8 @@ def execute_activity(task, str_template, txt_lines, lock=0):
         line = log_line(temp) + " Entry\n"
         print(line)
         txt_lines.append(line)
-        if lock != 0:
-            lock.acquire()
+        #if lock != 0:
+         #   lock.acquire()
         act_on_activities(sub_flow, temp, txt_lines, lock_new)
         line = log_line(temp) + " Exit\n"
         print(line)
@@ -59,29 +63,40 @@ def execute_activity(task, str_template, txt_lines, lock=0):
             line = log_line(temp) + " Entry\n"
             print(line)
             txt_lines.append(line)
-            op_str = log_line(temp)
             task_input = task['Inputs']
-            exec_time = int(task_input['ExecutionTime'])
+            #if lock != 0:
+             #   lock.acquire()
+            if len(task_input['ExecutionTime']) > 5:
+                exec_time = data
+            else:
+                exec_time = int(task_input['ExecutionTime'])
+            op_str = log_line(temp)
             op_str += " Executing TimeFunction("
             op_str += task_input['FunctionInput'] + ","
             op_str += str(exec_time) + ")\n"
             txt_lines.append(op_str)
-            if lock != 0:
-                lock.acquire()
             time_function(exec_time)
             line = log_line(temp) + " Exit\n"
             print(line)
             txt_lines.append(line)
         elif task['Function'] == 'DataLoad' and condition:
+            print("Current Task: ", temp)
+            line = log_line(temp) + " Entry\n"
+            print(line)
+            txt_lines.append(line)
+            task_input = task['Inputs']
             op_str = log_line(temp)
             task_input = task['Inputs']
             fname = task_input['Filename']
             op_str += "Executing DataLoad(" + fname + ')\n'
             txt_lines.append(op_str)
             file_data = data_load(txt_lines)
-            file_dict[temp[-1]] = file_data
-    if lock != 0:
-        lock.release()
+            file_dict[temp] = file_data
+            line = log_line(temp) + " Exit\n"
+            print(line)
+            txt_lines.append(line)
+    #if lock != 0:
+     #   lock.release()
     temp.pop(-1)
         
 #here the activities are parsed
@@ -132,6 +147,5 @@ if __name__ == "__main__":
             print("Workflow {} has been logged".format(x))
         print("File Created!")
         log_file.close()
-    print("log file closed")
-                
+    print("log file closed")                
             
